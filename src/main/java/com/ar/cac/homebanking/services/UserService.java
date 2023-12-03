@@ -1,15 +1,16 @@
 package com.ar.cac.homebanking.services;
 
+import com.ar.cac.homebanking.exceptions.UserExistsException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.User;
 import com.ar.cac.homebanking.models.dtos.UserDTO;
 import com.ar.cac.homebanking.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,13 +32,14 @@ public class UserService {
         return usersDtos;
     }
 
-    public UserDTO createUser(UserDTO userDto){
+    public UserDTO createUser(UserDTO userDto) throws UserExistsException {
         User userValidated = validateUserByEmail(userDto);
+
         if (userValidated == null){
             User userSaved = repository.save(UserMapper.dtoToUser(userDto));
             return UserMapper.userToDto(userSaved);
         } else{
-            throw new UserNotExistsException("Usuario con mail: " + userDto.getEmail() + " ya existe");
+            throw new UserExistsException("Usuario con mail: " + userDto.getEmail() + " ya existe");
         }
 
     }
@@ -48,15 +50,16 @@ public class UserService {
         return UserMapper.userToDto(entity);
     }
 
-    public String deleteUser(Long id){
-        if (repository.existsById(id)){
-            repository.deleteById(id);
-            return "El usuario con id: " + id + " ha sido eliminado";
+    public void deleteUser(Long id){
+       if (repository.existsById(id)){
+           repository.deleteById(id);
         } else {
-            throw new UserNotExistsException("El usuario a eliminar elegido no existe");
-        }
+           throw new UserNotExistsException("Usuario inexistente");
+       }
 
     }
+
+
 
     public UserDTO updateUser(Long id, UserDTO dto) {
         if (repository.existsById(id)){
@@ -96,4 +99,22 @@ public class UserService {
     public User validateUserByEmail(UserDTO dto){
         return repository.findByEmail(dto.getEmail());
     }
+
+    // Validar que existan usuarios unicos por mail
+/*
+    public User validateUserByEmail2(UserDTO dto){
+       try {
+           //Instrucciones cuando no hay exepcion
+           return repository.findByEmail(dto.getEmail());
+       } catch (Exception e) { //IOException ex?
+            // Instrucciones cuando se produce una excepcion
+               System.out.println("Escriba un mail válido");
+
+        }
+
+    }
+
+ */
 }
+
+

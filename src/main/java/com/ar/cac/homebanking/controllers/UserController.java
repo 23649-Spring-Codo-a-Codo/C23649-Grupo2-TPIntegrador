@@ -1,6 +1,8 @@
 package com.ar.cac.homebanking.controllers;
 
+import com.ar.cac.homebanking.exceptions.UserExistsException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
+import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.dtos.UserDTO;
 import com.ar.cac.homebanking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +41,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
     }
 
+    //CREATE USER anterior (sin try-catch). Borrar cuando el cambio esté aprobado
+    /*
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO user){
         return  ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
+    }
+*/
+    //CREATE USER con try-catch (Alejandra)
+    @PostMapping
+    public ResponseEntity<?> createUser(@RequestBody UserDTO user){
+        try {
+            UserDTO userCreated = service.createUser(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
+        } catch (UserExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+
     }
 
     @PutMapping(value="/{id}")
@@ -49,9 +65,22 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(service.updateUser(id, user));
     }
 
+    //DELETE USER anterior (sin try-catch). Borrar cuando el cambio esté aprobado
+    /*
     @DeleteMapping(value="/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
+    }
+*/
+    //DELETE USER con try-catch (Alejandra)
+    @DeleteMapping(value="/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+        try {
+            service.deleteUser(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Usuario borrado correctamente");
+        } catch (UserNotExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario a borrar no encontrado: " + e.getMessage());        }
+
     }
 
 }
