@@ -77,10 +77,27 @@ public class UserController {
 
     }
 
+    // UPDATE USER anterior (sin try-catch). Borrar cuando el cambio esté aprobado
+    /*
     @PutMapping(value="/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO user){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateUser(id, user));
     }
+*/
+    //UPDATE USER con try-catch (Alejandra)
+    @PutMapping(value="/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO user) {
+        try {
+            service.updateUser(id, user);
+            return ResponseEntity.status(HttpStatus.OK).body("Usuario modificado correctamente");
+        } catch (UserNotExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario a modificar no encontrado: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: no se pueden enviar datos nulos: " + e.getMessage());
+        }
+
+    }
+
 
     //DELETE USER anterior (sin try-catch). Borrar cuando el cambio esté aprobado
     /*
@@ -96,7 +113,8 @@ public class UserController {
             service.deleteUser(id);
             return ResponseEntity.status(HttpStatus.OK).body("Usuario borrado correctamente");
         } catch (UserNotExistsException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario a borrar no encontrado: " + e.getMessage());        }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario a borrar no encontrado: " + e.getMessage());
+        }
 
     }
 
