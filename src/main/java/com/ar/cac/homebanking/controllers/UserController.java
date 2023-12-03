@@ -36,10 +36,27 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
 
+    //GET USER by ID anterior (sin try-catch). Borrar cuando el cambio esté aprobado
+/*
     @GetMapping(value = "/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
     }
+*/
+
+    // GET USER BY ID con try-catch (Alejandra)
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id){
+        try {
+            service.getUserById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
+        } catch (UserNotExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado: " + e.getMessage());
+        }
+
+    }
+
+
 
     //CREATE USER anterior (sin try-catch). Borrar cuando el cambio esté aprobado
     /*

@@ -32,6 +32,7 @@ public class UserService {
         return usersDtos;
     }
 
+    // Le agregué "throws UserExistsException" (Alejandra)
     public UserDTO createUser(UserDTO userDto) throws UserExistsException {
         User userValidated = validateUserByEmail(userDto);
 
@@ -46,8 +47,13 @@ public class UserService {
 
 
     public UserDTO getUserById(Long id) {
-        User entity = repository.findById(id).get();
-        return UserMapper.userToDto(entity);
+        if (repository.existsById(id)) {
+            User entity = repository.findById(id).get();
+            return UserMapper.userToDto(entity);
+        } else {
+            throw new UserNotExistsException("Usuario inexistente");
+        }
+
     }
 
     public void deleteUser(Long id){
