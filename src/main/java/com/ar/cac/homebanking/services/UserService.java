@@ -40,7 +40,7 @@ public class UserService {
             User userSaved = repository.save(UserMapper.dtoToUser(userDto));
             return UserMapper.userToDto(userSaved);
         } else {
-            throw new UserExistsException("Usuario con mail: " + userDto.getEmail() + " ya existe");
+            throw new UserExistsException("Usuario con mail o con dni exitente: " + userDto.getEmail());
         }
 
     }
@@ -114,6 +114,8 @@ public class UserService {
     public User validateUserByEmail(UserDTO dto){
         return repository.findByEmail(dto.getEmail());
     }
+
+
 }
 
 

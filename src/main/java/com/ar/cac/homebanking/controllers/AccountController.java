@@ -1,5 +1,6 @@
 package com.ar.cac.homebanking.controllers;
 
+import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
 import com.ar.cac.homebanking.services.AccountService;
@@ -24,11 +25,25 @@ public class AccountController {
         List<AccountDTO> lista = service.getAccounts();
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
-
+/*
     @GetMapping(value = "/{id}")
     public ResponseEntity<AccountDTO> getAccount(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
     }
+*/
+    // GET Account BY ID con try-catch (Alejandra)
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<?> getAccountById(@PathVariable Long id){
+        try {
+            service.getAccountById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
+        } catch (UserNotExistsException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada: " + e.getMessage());
+        }
+
+    }
+
+
 
     @PostMapping
     public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO dto){

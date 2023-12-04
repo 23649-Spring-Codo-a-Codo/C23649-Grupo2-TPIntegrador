@@ -1,5 +1,6 @@
 package com.ar.cac.homebanking.services;
 
+import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.mappers.AccountMapper;
 import com.ar.cac.homebanking.mappers.UserMapper;
@@ -38,9 +39,19 @@ public class AccountService {
         return AccountMapper.accountToDto(newAccount);
     }
 
-    public AccountDTO getAccountById(Long id) {
+   /* public AccountDTO getAccountById(Long id) {
         Account entity = repository.findById(id).get();
         return AccountMapper.accountToDto(entity);
+    }*/
+
+    public AccountDTO getAccountById(Long id) {
+        if (repository.existsById(id)) {
+            Account entity = repository.findById(id).get();
+            return AccountMapper.accountToDto(entity);
+        } else {
+            throw new AccountNotFoundException("Cuenta inexistente");
+        }
+
     }
 
     public String deleteAccount(Long id){
