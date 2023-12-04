@@ -1,5 +1,6 @@
 package com.ar.cac.homebanking.controllers;
 
+import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
@@ -37,7 +38,7 @@ public class AccountController {
         try {
             service.getAccountById(id);
             return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
-        } catch (UserNotExistsException e) {
+        } catch (AccountNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada: " + e.getMessage());
         }
 
