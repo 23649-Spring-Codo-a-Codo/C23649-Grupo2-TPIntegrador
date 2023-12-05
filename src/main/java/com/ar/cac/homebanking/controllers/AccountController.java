@@ -1,5 +1,7 @@
 package com.ar.cac.homebanking.controllers;
 
+import com.ar.cac.homebanking.exceptions.AccountExistException;
+import com.ar.cac.homebanking.exceptions.AccountNotExistException;
 import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.models.Account;
@@ -46,14 +48,45 @@ public class AccountController {
 
 // FALTAN los try-catch de los siguientes metodos (Ale)
 
+/*
     @PostMapping
     public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(dto));
     }
+*/
+
+    //CREATE Account BY ID con try-catch (Claudia)
+
+    @PostMapping
+    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account) {
+        try {
+            AccountDTO accountCreated = service.createAccount(account);
+            return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
+        } catch (AccountExistException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
+/*
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<AccountDTO> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateAccount(id, dto));
+    }
+*/
+
+    //UPDATE Account BY ID con try-catch (Claudia)
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto) {
+        try {
+            service.updateAccount(id, dto);
+            return ResponseEntity.status(HttpStatus.OK).body("Cuenta modificada exitosamente");
+        } catch (AccountNotExistException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a modificar no encontrada: " + e.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: no se pueden enviar datos nulos: " + e.getMessage());
+        }
     }
 
     /*

@@ -65,7 +65,7 @@ public class UserController {
         return  ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
     }
 */
-    //CREATE USER con try-catch (Alejandra)
+    //CREATE USER con try-catch (Alejandra) VER QUE NO SE PUEDA CREAR CON MISMO DNI (FUNCIONA CON DISTINTO MAIL PERO NO CON DISTINTO DNI)
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserDTO user){
         try {

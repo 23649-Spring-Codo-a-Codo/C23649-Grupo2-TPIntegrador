@@ -1,5 +1,7 @@
 package com.ar.cac.homebanking.services;
 
+import com.ar.cac.homebanking.exceptions.AccountExistException;
+import com.ar.cac.homebanking.exceptions.AccountNotExistException;
 import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.mappers.AccountMapper;
@@ -31,12 +33,22 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
-    public AccountDTO createAccount(AccountDTO dto) {
+
+
+    public AccountDTO createAccount(AccountDTO accountDto) throws AccountExistException {
+        Account accountExists = accountExistByCbu(accountDto);
         // TODO: REFACTOR
-        dto.setType(AccountType.SAVINGS_BANK);
-        //dto.setAmount(BigDecimal.ZERO);
-        Account newAccount = repository.save(AccountMapper.dtoToAccount(dto));
-        return AccountMapper.accountToDto(newAccount);
+
+        // Dentro del if moví el setType para que la cuenta creada sea del tipo SAVINGS_BANK (Alejandra)
+
+        if (accountExists == null){
+            accountDto.setType(AccountType.SAVINGS_BANK);
+            accountDto.setAmount(BigDecimal.ZERO);
+            Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto));
+            return AccountMapper.accountToDto(newAccount);
+        } else {
+            throw new AccountExistException("La cuenta ya existe: " + accountDto.getCbu());
+        }
     }
 
    /* public AccountDTO getAccountById(Long id) {
@@ -65,32 +77,41 @@ public class AccountService {
 
     }
 
+    // UPDATE Account con throw (Claudia)
     public AccountDTO updateAccount(Long id, AccountDTO dto) {
         if (repository.existsById(id)) {
             Account accountToModify = repository.findById(id).get();
             // Validar qué datos no vienen en null para setearlos al objeto ya creado
+            if (dto.getAlias() != null || dto.getType() != null || dto.getCbu() != null || dto.getAmount() != null) {
+                // Logica del Patch
+                if (dto.getAlias() != null) {
+                    accountToModify.setAlias(dto.getAlias());
+                }
 
-            // Logica del Patch
-            if (dto.getAlias() != null) {
-                accountToModify.setAlias(dto.getAlias());
+                if (dto.getType() != null) {
+                    accountToModify.setType(dto.getType());
+                }
+
+                if (dto.getCbu() != null) {
+                    accountToModify.setCbu(dto.getCbu());
+                }
+
+                if (dto.getAmount() != null) {
+                    accountToModify.setAmount(dto.getAmount());
+                }
+
+                Account accountModified = repository.save(accountToModify);
+
+                return AccountMapper.accountToDto(accountModified);
+            }else {
+                throw new IllegalArgumentException("Al menos un campo obligatorio debe estar presente para la actualización.");
             }
-
-            if (dto.getType() != null) {
-                accountToModify.setType(dto.getType());
-            }
-
-            if (dto.getCbu() != null) {
-                accountToModify.setCbu(dto.getCbu());
-            }
-
-            if (dto.getAmount() != null) {
-                accountToModify.setAmount(dto.getAmount());
-            }
-
-            Account accountModified = repository.save(accountToModify);
-
-            return AccountMapper.accountToDto(accountModified);
+        }else{
+            throw new AccountNotExistException("La cuenta no existe");
         }
-        return null;
+    }
+
+    public Account accountExistByCbu(AccountDTO dto){
+        return repository.findByCbu(dto.getCbu());
     }
 }
