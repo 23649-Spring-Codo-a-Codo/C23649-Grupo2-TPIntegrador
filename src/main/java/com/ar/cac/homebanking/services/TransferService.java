@@ -3,7 +3,6 @@ package com.ar.cac.homebanking.services;
 import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.InsufficientFoundsException;
 import com.ar.cac.homebanking.exceptions.TransferNotFoundException;
-import com.ar.cac.homebanking.exceptions.TypeDataErrorException;
 import com.ar.cac.homebanking.mappers.TransferMapper;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.Transfer;
@@ -13,7 +12,6 @@ import com.ar.cac.homebanking.repositories.TransferRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,23 +67,16 @@ public class TransferService {
 
     @Transactional
     public TransferDTO performTransfer(TransferDTO dto) {
-
-
+        // Comprobar si las cuentas de origen y destino existen
         Account originAccount = accountRepository.findById(dto.getOrigin())
-          .orElseThrow(() -> new AccountNotFoundException("La cuenta origen no existe id: " + dto.getOrigin()));
-
+          .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + dto.getOrigin()));
         Account destinationAccount = accountRepository.findById(dto.getTarget())
-          .orElseThrow(() -> new AccountNotFoundException("La cuenta destino no existe id: " + dto.getTarget()));
+          .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + dto.getTarget()));
 
         // Comprobar si la cuenta de origen tiene fondos suficientes
         if (originAccount.getAmount().compareTo(dto.getAmount()) < 0) {
             throw new InsufficientFoundsException("Fondos Insuficientes en la cuenta con id: " + dto.getOrigin());
         }
-        //Comprobar formato correcto
-        if (!isBigDecimalType(dto.getAmount())) {
-            throw new IllegalArgumentException("Formato no válido para el monto de la transferencia");
-        }
-
 
         // Realizar la transferencia
         originAccount.setAmount(originAccount.getAmount().subtract(dto.getAmount()));
@@ -109,27 +100,8 @@ public class TransferService {
         // Devolver el DTO de la transferencia realizada
         return TransferMapper.transferToDto(transfer);
 
-    }
 
-    /*private boolean isBigDecimalType(Object obj) {
-        if ( obj instanceof BigDecimal){
-            BigDecimal amount = (BigDecimal) obj;
-            return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
-        }
-        return false;
-    }*/
-    private boolean isBigDecimalType(Object obj) {
-        // Verificar si obj no es un String
-        if (!(obj instanceof String)) {
-            // Verificar si obj es un BigDecimal y si es mayor que cero
-            if (obj instanceof BigDecimal) {
-                BigDecimal amount = (BigDecimal) obj;
-                return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
-            }
-        }
-        return false;
     }
-
     private void validateAccountsExist(Long originAccountId, Long destinationAccountId) {
         if (!accountRepository.existsById(originAccountId)) {
             throw new AccountNotFoundException("Cuenta de origen no encontrada con id: " + originAccountId);
