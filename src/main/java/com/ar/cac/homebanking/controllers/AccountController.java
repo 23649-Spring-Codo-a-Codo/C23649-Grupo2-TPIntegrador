@@ -44,7 +44,7 @@ public class AccountController {
 
     }
 
-
+// FALTAN los try-catch de los siguientes metodos (Ale)
 
     @PostMapping
     public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO dto){
@@ -56,8 +56,25 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.OK).body(service.updateAccount(id, dto));
     }
 
+    /*
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
     }
+    */
+
+
+    //DELETE Account con try-catch (Alejandra)
+    @DeleteMapping(value="/{id}")
+    public ResponseEntity<String> deleteAccount(@PathVariable Long id){
+        try {
+            service.deleteAccount(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Cuenta borrada correctamente");
+        } catch (AccountNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a borrar no encontrada: " + e.getMessage());
+        }
+
+    }
+
+
 }

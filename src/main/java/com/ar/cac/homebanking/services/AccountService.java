@@ -33,8 +33,8 @@ public class AccountService {
 
     public AccountDTO createAccount(AccountDTO dto) {
         // TODO: REFACTOR
-        //dto.setType(AccountType.SAVINGS_BANK);
-        dto.setAmount(BigDecimal.ZERO);
+        dto.setType(AccountType.SAVINGS_BANK);
+        //dto.setAmount(BigDecimal.ZERO);
         Account newAccount = repository.save(AccountMapper.dtoToAccount(dto));
         return AccountMapper.accountToDto(newAccount);
     }
@@ -60,7 +60,7 @@ public class AccountService {
             return "La cuenta con id: " + id + " ha sido eliminada";
         } else {
             // TODO: REFACTOR create new exception
-            throw new UserNotExistsException("La cuenta a eliminar no existe");
+            throw new AccountNotFoundException("La cuenta a eliminar no existe");
         }
 
     }
