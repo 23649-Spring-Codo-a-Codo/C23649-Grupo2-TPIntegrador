@@ -27,7 +27,9 @@ public class Account {
 
     private BigDecimal amount;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private User owner;
+
+
 
 }
