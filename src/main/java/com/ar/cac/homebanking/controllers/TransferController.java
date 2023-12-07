@@ -1,6 +1,7 @@
 package com.ar.cac.homebanking.controllers;
 
 
+import com.ar.cac.homebanking.tools.ExceptionHandler;
 import com.ar.cac.homebanking.exceptions.InsufficientFoundsException;
 import com.ar.cac.homebanking.exceptions.TransferNotExistException;
 import com.ar.cac.homebanking.exceptions.TransferNotFoundException;
@@ -75,23 +76,28 @@ public class TransferController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en la operación: " + e.getMessage());
         }
     }*/
-    @PostMapping
-    public ResponseEntity<?> performTransfer(@RequestBody TransferDTO dto){
-        try{
+/*    @PostMapping
+    public ResponseEntity<?> performTransfer(@RequestBody TransferDTO dto) {
+        try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.performTransfer(dto));
-        }catch (HttpMessageNotReadableException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en formato!");
-        }catch (InsufficientFoundsException e){
+
+
+        } catch (InsufficientFoundsException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se puede hacer la transferencia: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (HttpMessageNotReadableException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en formato: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }*/
+    @PostMapping
+    public ResponseEntity<?> performTransfer(@RequestBody TransferDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.performTransfer(dto));
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e, e.getMessage());
         }
     }
-
-
-
-
-
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<?> updateTransfer(@PathVariable Long id, @RequestBody TransferDTO transfer){

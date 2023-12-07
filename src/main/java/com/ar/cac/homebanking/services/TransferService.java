@@ -74,6 +74,7 @@ public class TransferService {
         Account originAccount = accountRepository.findById(dto.getOrigin())
           .orElseThrow(() -> new AccountNotFoundException("La cuenta origen no existe id: " + dto.getOrigin()));
 
+
         Account destinationAccount = accountRepository.findById(dto.getTarget())
           .orElseThrow(() -> new AccountNotFoundException("La cuenta destino no existe id: " + dto.getTarget()));
 
@@ -83,7 +84,7 @@ public class TransferService {
         }
         //Comprobar formato correcto
         if (!isBigDecimalType(dto.getAmount())) {
-            throw new IllegalArgumentException("Formato no válido para el monto de la transferencia");
+            throw new IllegalArgumentException("La Transferencia no puede ser nula ni menor a 1");
         }
 
 
@@ -119,18 +120,17 @@ public class TransferService {
         return false;
     }*/
     private boolean isBigDecimalType(Object obj) {
-        // Verificar si obj no es un String
-        if (!(obj instanceof String)) {
-            // Verificar si obj es un BigDecimal y si es mayor que cero
+
+            // Verificar si obj(amount) es un BigDecimal y si es mayor que cero
             if (obj instanceof BigDecimal) {
                 BigDecimal amount = (BigDecimal) obj;
                 return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
             }
-        }
+
         return false;
     }
 
-    private void validateAccountsExist(Long originAccountId, Long destinationAccountId) {
+    /*private void validateAccountsExist(Long originAccountId, Long destinationAccountId) {
         if (!accountRepository.existsById(originAccountId)) {
             throw new AccountNotFoundException("Cuenta de origen no encontrada con id: " + originAccountId);
         }
@@ -138,7 +138,7 @@ public class TransferService {
         if (!accountRepository.existsById(destinationAccountId)) {
             throw new AccountNotFoundException("Cuenta de destino no encontrada con id: " + destinationAccountId);
         }
-    }
+    }*/
 
 
 

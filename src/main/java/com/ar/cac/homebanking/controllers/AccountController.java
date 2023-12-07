@@ -1,9 +1,9 @@
 package com.ar.cac.homebanking.controllers;
 
-import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
-import com.ar.cac.homebanking.exceptions.UserNotExistsException;
+import com.ar.cac.homebanking.exceptions.*;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
+import com.ar.cac.homebanking.models.dtos.UserDTO;
 import com.ar.cac.homebanking.services.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,17 +47,47 @@ public class AccountController {
 
 
     @PostMapping
-    public ResponseEntity<AccountDTO> createAccount(@RequestBody AccountDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(dto));
+    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account) {
+        try {
+            AccountDTO accountCreated = service.createAccount(account);
+            return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
+        } catch (AccountExistException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
-    @PutMapping(value = "/{id}")
+
+   /* @PutMapping(value = "/{id}")
     public ResponseEntity<AccountDTO> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateAccount(id, dto));
     }
+*/
+   @PutMapping(value = "/{id}")
+   public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto) {
+       try {
+           service.updateAccount(id, dto);
+           return ResponseEntity.status(HttpStatus.OK).body("Cuenta modificada exitosamente");
+       } catch (AccountNotExistException e){
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a modificar no encontrada: " + e.getMessage());
+       } catch (Exception e){
+           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: no se pueden enviar datos nulos: " + e.getMessage());
+       }
+   }
+
+   /* @DeleteMapping(value = "/{id}")
+    public ResponseEntity<String> deleteAccount(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
+    }*/
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
+        try{
+            service.deleteAccount(id);
+            return ResponseEntity.status(HttpStatus.OK).body("Cuenta eliminada correctamente");
+        } catch (AccountNotExistException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a borrar no encontrada: " + e.getMessage());
+        }
+
     }
+
 }
