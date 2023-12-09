@@ -47,17 +47,7 @@ public class AccountController {
     }
 
 
-    //express cashier
-    @PostMapping("/withdraw/{id}")
-    public ResponseEntity<AccountDTO> withdraw(@PathVariable Long id, @RequestBody TransactionDTO dto) {
-        return ResponseEntity.status(HttpStatus.OK).body( service.withdraw(id, dto));
 
-    }
-
-    @PostMapping("/deposit/{id}")
-    public ResponseEntity<AccountDTO> deposit(@PathVariable Long id, @RequestBody TransactionDTO dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.deposit(id,dto));
-    } //no logro
     @GetMapping("/balance/{id}")
     public ResponseEntity<BigDecimal> getBalance(@PathVariable Long id) {
 

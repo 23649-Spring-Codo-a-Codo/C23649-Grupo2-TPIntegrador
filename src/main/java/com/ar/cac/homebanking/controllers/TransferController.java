@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -33,6 +34,7 @@ public class TransferController {
 
     @PostMapping
     public ResponseEntity<TransferDTO> performTransfer(@RequestBody TransferDTO dto){
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.performTransfer(dto));
     }
 
@@ -44,5 +46,22 @@ public class TransferController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteTransfer(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteTransfer(id));
+    }
+
+    //express cashier
+    @PostMapping("/withdraw/{id}")
+    public ResponseEntity<TransferDTO> withdraw(@PathVariable Long id, @RequestBody TransferDTO dto)
+    {
+        dto.setOrigin(id);
+        dto.setTarget(id);
+        return ResponseEntity.status(HttpStatus.OK).body( service.withdraw(dto));
+
+    }
+
+    @PostMapping("/deposit/{id}")
+    public ResponseEntity<TransferDTO> deposit(@PathVariable Long id, @RequestBody TransferDTO dto) {
+        dto.setOrigin(id);
+        dto.setTarget(id); //no se que tan bueno respecto a seguridad sea este seteo!!
+        return ResponseEntity.status(HttpStatus.OK).body(service.deposit(dto));
     }
 }

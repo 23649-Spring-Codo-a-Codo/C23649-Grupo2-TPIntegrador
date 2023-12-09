@@ -1,5 +1,7 @@
 package com.ar.cac.homebanking.services;
 
+import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
+import com.ar.cac.homebanking.exceptions.InsufficientFoundsException;
 import com.ar.cac.homebanking.exceptions.UserNotExistsException;
 import com.ar.cac.homebanking.mappers.AccountMapper;
 import com.ar.cac.homebanking.models.Account;
@@ -87,26 +89,14 @@ public class AccountService {
         return null;
     }
 
-    //metodos para retiro, deposito y consulta de saldo
-    public AccountDTO withdraw(Long id, TransactionDTO dto) {
-        Account accountToModify = repository.findById(id).get();
-        accountToModify.setAmount(accountToModify.getAmount().subtract(dto.getAmount()));
 
-        repository.save(accountToModify);
-        return AccountMapper.accountToDto(accountToModify);
-    }
-
-    public AccountDTO deposit(Long id, TransactionDTO dto) {
-        Account accountToModify = repository.findById(id).get();
-        accountToModify.setAmount(accountToModify.getAmount().add(dto.getAmount()));
-
-        repository.save(accountToModify);
-        return AccountMapper.accountToDto(accountToModify);
-    }
     public BigDecimal getBalance (Long id) {
         Account accountB = repository.findById(id).get();
 
        return accountB.getAmount();
     }
+
+
+
 
 }
