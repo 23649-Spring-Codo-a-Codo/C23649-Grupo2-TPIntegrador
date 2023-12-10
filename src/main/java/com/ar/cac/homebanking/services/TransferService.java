@@ -10,6 +10,7 @@ import com.ar.cac.homebanking.models.Transfer;
 import com.ar.cac.homebanking.models.dtos.TransferDTO;
 import com.ar.cac.homebanking.repositories.AccountRepository;
 import com.ar.cac.homebanking.repositories.TransferRepository;
+import com.ar.cac.homebanking.tools.AccountUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,10 @@ public class TransferService {
 
 
     public TransferDTO updateTransfer(Long id, TransferDTO transferDto){
+
+        Account originAccount = AccountUtils.findAccountByIdOrThrow(accountRepository, transferDto.getOrigin(), "La cuenta origen no existe id: ");
+        Account destinationAccount = AccountUtils.findAccountByIdOrThrow(accountRepository, transferDto.getTarget(), "La cuenta destino no existe id: ");
+
         Transfer transfer = repository.findById(id).orElseThrow(() -> new TransferNotFoundException("La transferencia con el id " + id + " no existe"));
         Transfer updatedTransfer = TransferMapper.dtoToTransfer(transferDto);
         updatedTransfer.setId(transfer.getId());
@@ -70,13 +75,13 @@ public class TransferService {
     @Transactional
     public TransferDTO performTransfer(TransferDTO dto) {
 
+        Account originAccount = AccountUtils.findAccountByIdOrThrow(accountRepository, dto.getOrigin(), "La cuenta origen no existe id: ");
+        Account destinationAccount = AccountUtils.findAccountByIdOrThrow(accountRepository, dto.getTarget(), "La cuenta destino no existe id: ");
 
-        Account originAccount = accountRepository.findById(dto.getOrigin())
+/*        Account originAccount = accountRepository.findById(dto.getOrigin())
           .orElseThrow(() -> new AccountNotFoundException("La cuenta origen no existe id: " + dto.getOrigin()));
-
-
         Account destinationAccount = accountRepository.findById(dto.getTarget())
-          .orElseThrow(() -> new AccountNotFoundException("La cuenta destino no existe id: " + dto.getTarget()));
+          .orElseThrow(() -> new AccountNotFoundException("La cuenta destino no existe id: " + dto.getTarget()));*/
 
         // Comprobar si la cuenta de origen tiene fondos suficientes
         if (originAccount.getAmount().compareTo(dto.getAmount()) < 0) {

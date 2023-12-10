@@ -105,18 +105,20 @@ public class TransferController {
             service.updateTransfer(id, transfer);
             return ResponseEntity.status(HttpStatus.OK).body(service.updateTransfer(id, transfer));
         } catch (Exception e) {
+            return ExceptionHandler.handleException(e, e.getMessage());
+        }/*catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en la operacion:" + e.getMessage());
-        }
+        }*/
 
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<String> deleteTransfer(@PathVariable Long id){
+    public ResponseEntity<?> deleteTransfer(@PathVariable Long id){
         try{
             service.deleteTransfer(id);
             return ResponseEntity.status(HttpStatus.OK).body("Transferencia con id "+id+" eliminada correctamente");
-        } catch (TransferNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transferencia Inexistente" + e.getMessage());
+        } catch (Exception e) {
+            return ExceptionHandler.handleException(e, e.getMessage());
         }
 
     }
