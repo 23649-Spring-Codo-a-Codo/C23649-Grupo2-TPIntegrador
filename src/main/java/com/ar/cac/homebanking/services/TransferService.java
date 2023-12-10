@@ -4,9 +4,12 @@ import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
 import com.ar.cac.homebanking.exceptions.InsufficientFoundsException;
 import com.ar.cac.homebanking.exceptions.TransferNotFoundException;
 import com.ar.cac.homebanking.exceptions.TypeDataErrorException;
+import com.ar.cac.homebanking.mappers.AccountMapper;
 import com.ar.cac.homebanking.mappers.TransferMapper;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.Transfer;
+import com.ar.cac.homebanking.models.dtos.AccountDTO;
+import com.ar.cac.homebanking.models.dtos.TransactionDTO;
 import com.ar.cac.homebanking.models.dtos.TransferDTO;
 import com.ar.cac.homebanking.repositories.AccountRepository;
 import com.ar.cac.homebanking.repositories.TransferRepository;
@@ -147,5 +150,58 @@ public class TransferService {
 
 
 
+
+    //metodos para retiro y deposito que se guardará como una transferencia mas
+    public TransferDTO withdraw(TransferDTO dto) {
+
+        Transfer transfer = new Transfer();
+        if (validateAccount(dto.getOrigin()) && checkFounds(dto.getOrigin(), dto.getAmount())){
+            Account accountToModify = accountRepository.findById(dto.getOrigin()).get();
+            accountToModify.setAmount(accountToModify.getAmount().subtract(dto.getAmount()));
+            accountRepository.save(accountToModify);
+            // Seteamos el objeto fecha actual en el transferDto
+            transfer.setDate(new Date());
+            transfer.setOrigin(dto.getOrigin());
+            transfer.setTarget(dto.getTarget());
+            transfer.setAmount(dto.getAmount());
+            transfer = repository.save(transfer);
+
+        }
+        return TransferMapper.transferToDto(transfer);
+    }
+
+    public TransferDTO deposit(TransferDTO dto) {
+
+        Transfer transfer = new Transfer();
+        if (validateAccount(dto.getOrigin())){
+            Account accountToModify = accountRepository.findById(dto.getOrigin()).get();
+            accountToModify.setAmount(accountToModify.getAmount().add(dto.getAmount()));
+            accountRepository.save(accountToModify);
+            // Seteamos el objeto fecha actual en el transferDto
+            transfer.setDate(new Date());
+            transfer.setOrigin(dto.getOrigin());
+            transfer.setTarget(dto.getTarget());
+            transfer.setAmount(dto.getAmount());
+            transfer = repository.save(transfer);
+
+        }
+        return TransferMapper.transferToDto(transfer);
+    }
+    public Boolean validateAccount(Long id) {
+        accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException("La cuenta con id: " +id+" no existe"));
+        return true;
+    }
+
+    public Boolean checkFounds (Long id, BigDecimal amount) {
+        Account accountToCheck = accountRepository.findById(id).get();
+
+        if (accountToCheck.getAmount().compareTo(amount) >= 0) {
+            return true; //fondos suficientes
+        } else {
+            throw new InsufficientFoundsException("Fondos Insuficientes en la cuenta con id: " + id);
+        }
+
+    }
 
 }

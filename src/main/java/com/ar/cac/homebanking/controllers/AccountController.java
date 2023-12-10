@@ -4,11 +4,14 @@ import com.ar.cac.homebanking.exceptions.*;
 import com.ar.cac.homebanking.models.Account;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
 import com.ar.cac.homebanking.models.dtos.UserDTO;
+import com.ar.cac.homebanking.models.dtos.AccountDTO;
+import com.ar.cac.homebanking.models.dtos.TransactionDTO;
 import com.ar.cac.homebanking.services.AccountService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -89,5 +92,14 @@ public class AccountController {
         }
 
     }
+
+
+
+    @GetMapping("/balance/{id}")
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable Long id) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(service.getBalance(id));
+    }
+
 
 }

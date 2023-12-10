@@ -14,6 +14,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -121,5 +122,22 @@ public class TransferController {
             return ExceptionHandler.handleException(e, e.getMessage());
         }
 
+    }
+
+    //express cashier
+    @PostMapping("/withdraw/{id}")
+    public ResponseEntity<TransferDTO> withdraw(@PathVariable Long id, @RequestBody TransferDTO dto)
+    {
+        dto.setOrigin(id);
+        dto.setTarget(id);
+        return ResponseEntity.status(HttpStatus.OK).body( service.withdraw(dto));
+
+    }
+
+    @PostMapping("/deposit/{id}")
+    public ResponseEntity<TransferDTO> deposit(@PathVariable Long id, @RequestBody TransferDTO dto) {
+        dto.setOrigin(id);
+        dto.setTarget(id); //no se que tan bueno respecto a seguridad sea este seteo!!
+        return ResponseEntity.status(HttpStatus.OK).body(service.deposit(dto));
     }
 }

@@ -25,4 +25,5 @@ public class Transfer {
     private Date date;
 
     private BigDecimal amount;
+
 }

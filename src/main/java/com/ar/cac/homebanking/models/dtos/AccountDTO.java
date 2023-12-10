@@ -21,5 +21,7 @@ public class AccountDTO {
     private String alias;
 
     private BigDecimal amount;
+    // asociamos un usuario a la cuenta mediante su id
+    private Long ownerId;
 
 }
