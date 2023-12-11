@@ -11,5 +11,4 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
 
     User findByDni(String dni);
-    User getById(Long ownerId);
 }
