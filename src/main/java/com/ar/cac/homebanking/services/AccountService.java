@@ -1,9 +1,6 @@
 package com.ar.cac.homebanking.services;
 
-import com.ar.cac.homebanking.exceptions.AccountExistException;
-import com.ar.cac.homebanking.exceptions.AccountNotExistException;
-import com.ar.cac.homebanking.exceptions.AccountNotFoundException;
-import com.ar.cac.homebanking.exceptions.UserNotExistsException;
+import com.ar.cac.homebanking.exceptions.*;
 import com.ar.cac.homebanking.mappers.AccountMapper;
 import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.Account;
@@ -33,20 +30,15 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
-
-
     public AccountDTO createAccount(AccountDTO accountDto) throws AccountExistException {
         Account accountExists = accountExistByCbu(accountDto);
         // TODO: REFACTOR
-
-        // Dentro del if moví el setType para que la cuenta creada sea del tipo SAVINGS_BANK (Alejandra)
-
+        //dto.setType(AccountType.SAVINGS_BANK);
         if (accountExists == null){
-            accountDto.setType(AccountType.SAVINGS_BANK);
             accountDto.setAmount(BigDecimal.ZERO);
             Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto));
             return AccountMapper.accountToDto(newAccount);
-        } else {
+    } else {
             throw new AccountExistException("La cuenta ya existe: " + accountDto.getCbu());
         }
     }
@@ -66,18 +58,16 @@ public class AccountService {
 
     }
 
-    public String deleteAccount(Long id){
+    public void deleteAccount(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
-            return "La cuenta con id: " + id + " ha sido eliminada";
         } else {
             // TODO: REFACTOR create new exception
-            throw new AccountNotFoundException("La cuenta a eliminar no existe");
+            throw new AccountNotExistException("La cuenta a eliminar no existe");
         }
 
     }
 
-    // UPDATE Account con throw (Claudia)
     public AccountDTO updateAccount(Long id, AccountDTO dto) {
         if (repository.existsById(id)) {
             Account accountToModify = repository.findById(id).get();
