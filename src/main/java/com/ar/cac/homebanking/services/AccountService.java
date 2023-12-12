@@ -1,6 +1,6 @@
 package com.ar.cac.homebanking.services;
 
-import com.ar.cac.homebanking.exceptions.UserNotExistsException;
+import com.ar.cac.homebanking.exceptions.*;
 import com.ar.cac.homebanking.mappers.AccountMapper;
 import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.Account;
@@ -30,26 +30,40 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
-    public AccountDTO createAccount(AccountDTO dto) {
+    public AccountDTO createAccount(AccountDTO accountDto) throws AccountExistException {
+        Account accountExists = accountExistByCbu(accountDto);
         // TODO: REFACTOR
         //dto.setType(AccountType.SAVINGS_BANK);
-        dto.setAmount(BigDecimal.ZERO);
-        Account newAccount = repository.save(AccountMapper.dtoToAccount(dto));
-        return AccountMapper.accountToDto(newAccount);
+        if (accountExists == null){
+            accountDto.setAmount(BigDecimal.ZERO);
+            Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto));
+            return AccountMapper.accountToDto(newAccount);
+    } else {
+            throw new AccountExistException("La cuenta ya existe: " + accountDto.getCbu());
+        }
     }
 
-    public AccountDTO getAccountById(Long id) {
+   /* public AccountDTO getAccountById(Long id) {
         Account entity = repository.findById(id).get();
         return AccountMapper.accountToDto(entity);
+    }*/
+
+    public AccountDTO getAccountById(Long id) {
+        if (repository.existsById(id)) {
+            Account entity = repository.findById(id).get();
+            return AccountMapper.accountToDto(entity);
+        } else {
+            throw new AccountNotFoundException("Cuenta inexistente");
+        }
+
     }
 
-    public String deleteAccount(Long id){
+    public void deleteAccount(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
-            return "La cuenta con id: " + id + " ha sido eliminada";
         } else {
             // TODO: REFACTOR create new exception
-            throw new UserNotExistsException("La cuenta a eliminar no existe");
+            throw new AccountNotExistException("La cuenta a eliminar no existe");
         }
 
     }
@@ -58,28 +72,36 @@ public class AccountService {
         if (repository.existsById(id)) {
             Account accountToModify = repository.findById(id).get();
             // Validar qué datos no vienen en null para setearlos al objeto ya creado
+            if (dto.getAlias() != null || dto.getType() != null || dto.getCbu() != null || dto.getAmount() != null) {
+                // Logica del Patch
+                if (dto.getAlias() != null) {
+                    accountToModify.setAlias(dto.getAlias());
+                }
 
-            // Logica del Patch
-            if (dto.getAlias() != null) {
-                accountToModify.setAlias(dto.getAlias());
+                if (dto.getType() != null) {
+                    accountToModify.setType(dto.getType());
+                }
+
+                if (dto.getCbu() != null) {
+                    accountToModify.setCbu(dto.getCbu());
+                }
+
+                if (dto.getAmount() != null) {
+                    accountToModify.setAmount(dto.getAmount());
+                }
+
+                Account accountModified = repository.save(accountToModify);
+
+                return AccountMapper.accountToDto(accountModified);
+            }else {
+                throw new IllegalArgumentException("Al menos un campo obligatorio debe estar presente para la actualización.");
             }
-
-            if (dto.getType() != null) {
-                accountToModify.setType(dto.getType());
-            }
-
-            if (dto.getCbu() != null) {
-                accountToModify.setCbu(dto.getCbu());
-            }
-
-            if (dto.getAmount() != null) {
-                accountToModify.setAmount(dto.getAmount());
-            }
-
-            Account accountModified = repository.save(accountToModify);
-
-            return AccountMapper.accountToDto(accountModified);
+        }else{
+            throw new AccountNotExistException("La cuenta no existe");
         }
-        return null;
+    }
+
+    public Account accountExistByCbu(AccountDTO dto){
+        return repository.findByCbu(dto.getCbu());
     }
 }
