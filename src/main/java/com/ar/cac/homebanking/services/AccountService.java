@@ -4,11 +4,15 @@ package com.ar.cac.homebanking.services;
 import com.ar.cac.homebanking.exceptions.*;
 
 import com.ar.cac.homebanking.mappers.AccountMapper;
+import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.Account;
+import com.ar.cac.homebanking.models.User;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
+
+import com.ar.cac.homebanking.models.dtos.UserDTO;
+import com.ar.cac.homebanking.models.enums.AccountType;
+
 import com.ar.cac.homebanking.repositories.AccountRepository;
-import com.ar.cac.homebanking.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,8 +22,6 @@ import java.util.stream.Collectors;
 @Service
 public class AccountService {
 
-    @Autowired
-    private UserRepository userRepository; // para poder buscar en la db los susuarios necesarios
     private final AccountRepository repository;
 
     public AccountService(AccountRepository repository){
@@ -35,13 +37,12 @@ public class AccountService {
     public AccountDTO createAccount(AccountDTO accountDto) throws AccountExistException {
         Account accountExists = accountExistByCbu(accountDto);
         // TODO: REFACTOR
-
-
         //dto.setType(AccountType.SAVINGS_BANK);
+
 
         if (accountExists == null){
             accountDto.setAmount(BigDecimal.ZERO);
-            Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto,userRepository));
+            Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto));
             return AccountMapper.accountToDto(newAccount);
     } else {
             throw new AccountExistException("La cuenta ya existe: " + accountDto.getCbu());
@@ -110,15 +111,4 @@ public class AccountService {
     public Account accountExistByCbu(AccountDTO dto){
         return repository.findByCbu(dto.getCbu());
     }
-
-
-    public BigDecimal getBalance (Long id) {
-        Account accountB = repository.findById(id).get();
-
-       return accountB.getAmount();
-    }
-
-
-
-
 }
