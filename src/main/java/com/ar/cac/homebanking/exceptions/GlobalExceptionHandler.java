@@ -17,4 +17,4 @@ public class GlobalExceptionHandler {
         return "Hay un caracter inválido en la operacion. Verifica los datos ingresados.";
     }
 }
-/
+

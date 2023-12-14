@@ -9,7 +9,7 @@ public class ExceptionHandler {
 
     public static ResponseEntity<?> handleException(Exception e, String errorMessage) {
         if (e instanceof InsufficientFoundsException) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se puede hacer la transferencia: " + errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error en la operacion: " + errorMessage);
         } else if (e instanceof HttpMessageNotReadableException) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en formato: " + errorMessage);
         } else {
