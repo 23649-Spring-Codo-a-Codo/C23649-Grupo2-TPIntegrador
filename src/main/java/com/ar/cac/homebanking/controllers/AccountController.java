@@ -15,79 +15,43 @@ import java.util.List;
 @RequestMapping("/api/accounts")
 public class AccountController {
 
+
     private final AccountService service;
 
     public AccountController(AccountService service){
         this.service = service;
     }
 
+    // GET ALL ACCOUNTS
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAccounts(){
         List<AccountDTO> lista = service.getAccounts();
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
-/*
+
+    // GET ACCOUNT BY ID con GlobalExceptionHandler (Alejandra)
     @GetMapping(value = "/{id}")
     public ResponseEntity<AccountDTO> getAccount(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
     }
-*/
-    // GET Account BY ID con try-catch (Alejandra)
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<?> getAccountById(@PathVariable Long id){
-        try {
-            service.getAccountById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
-        } catch (AccountNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada: " + e.getMessage());
-        }
 
-    }
-
-
-
+    // CREATE ACCOUNT con GlobalExceptionHandler (Alejandra)
     @PostMapping
     public ResponseEntity<?> createAccount(@RequestBody AccountDTO account) {
-        try {
-            AccountDTO accountCreated = service.createAccount(account);
-            return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
-        } catch (AccountExistException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+        AccountDTO accountCreated = service.createAccount(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
     }
 
-
-   /* @PutMapping(value = "/{id}")
-    public ResponseEntity<AccountDTO> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto){
-        return ResponseEntity.status(HttpStatus.OK).body(service.updateAccount(id, dto));
+    // UPDATE ACCOUNT con GlobalExcepcionHandler (Alejandra)
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto) {
+        service.updateAccount(id, dto);
+        return ResponseEntity.status(HttpStatus.OK).body("Cuenta modificada exitosamente");
     }
-*/
-   @PutMapping(value = "/{id}")
-   public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto) {
-       try {
-           service.updateAccount(id, dto);
-           return ResponseEntity.status(HttpStatus.OK).body("Cuenta modificada exitosamente");
-       } catch (AccountNotExistException e){
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a modificar no encontrada: " + e.getMessage());
-       } catch (Exception e){
-           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: no se pueden enviar datos nulos: " + e.getMessage());
-       }
-   }
 
-   /* @DeleteMapping(value = "/{id}")
-    public ResponseEntity<String> deleteAccount(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
-    }*/
-
+    // DELETE ACCOUNT con GlobalExcepcionHandler (Alejandra)
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id){
-        try{
-            service.deleteAccount(id);
-            return ResponseEntity.status(HttpStatus.OK).body("Cuenta eliminada correctamente");
-        } catch (AccountNotExistException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta a borrar no encontrada: " + e.getMessage());
-        }
-
+        return ResponseEntity.status(HttpStatus.OK).body("Cuenta eliminada correctamente");
     }
-
 }

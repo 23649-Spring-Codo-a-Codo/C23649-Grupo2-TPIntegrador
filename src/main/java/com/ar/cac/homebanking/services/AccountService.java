@@ -1,13 +1,10 @@
 package com.ar.cac.homebanking.services;
 
-import com.ar.cac.homebanking.exceptions.*;
+import com.ar.cac.homebanking.exceptions.AccountExistException;
+import com.ar.cac.homebanking.exceptions.AccountNotExistException;
 import com.ar.cac.homebanking.mappers.AccountMapper;
-import com.ar.cac.homebanking.mappers.UserMapper;
 import com.ar.cac.homebanking.models.Account;
-import com.ar.cac.homebanking.models.User;
 import com.ar.cac.homebanking.models.dtos.AccountDTO;
-import com.ar.cac.homebanking.models.dtos.UserDTO;
-import com.ar.cac.homebanking.models.enums.AccountType;
 import com.ar.cac.homebanking.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +27,7 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
-    public AccountDTO createAccount(AccountDTO accountDto) throws AccountExistException {
+    public AccountDTO createAccount(AccountDTO accountDto) {
         Account accountExists = accountExistByCbu(accountDto);
         // TODO: REFACTOR
         //dto.setType(AccountType.SAVINGS_BANK);
@@ -39,33 +36,25 @@ public class AccountService {
             Account newAccount = repository.save(AccountMapper.dtoToAccount(accountDto));
             return AccountMapper.accountToDto(newAccount);
     } else {
-            throw new AccountExistException("La cuenta ya existe: " + accountDto.getCbu());
+            throw new AccountExistException("CBU existente: " + accountDto.getCbu());
         }
     }
-
-   /* public AccountDTO getAccountById(Long id) {
-        Account entity = repository.findById(id).get();
-        return AccountMapper.accountToDto(entity);
-    }*/
 
     public AccountDTO getAccountById(Long id) {
         if (repository.existsById(id)) {
             Account entity = repository.findById(id).get();
             return AccountMapper.accountToDto(entity);
         } else {
-            throw new AccountNotFoundException("Cuenta inexistente");
+            throw new AccountNotExistException("Cuenta inexistente");
         }
-
     }
 
     public void deleteAccount(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
         } else {
-            // TODO: REFACTOR create new exception
             throw new AccountNotExistException("La cuenta a eliminar no existe");
         }
-
     }
 
     public AccountDTO updateAccount(Long id, AccountDTO dto) {

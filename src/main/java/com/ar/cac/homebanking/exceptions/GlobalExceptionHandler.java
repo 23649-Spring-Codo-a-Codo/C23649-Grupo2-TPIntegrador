@@ -1,4 +1,6 @@
 package com.ar.cac.homebanking.exceptions;
+import com.ar.cac.homebanking.models.Account;
+import com.ar.cac.homebanking.repositories.AccountRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -26,12 +28,6 @@ public class GlobalExceptionHandler {
 
     // Excepciones para ACCOUNTS
 
-    @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<String> handleAccountNotFoundException(AccountNotFoundException e) {
-        // Manejar excepción de cuenta no encontrada
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta no encontrada");
-    }
-
     @ExceptionHandler(AccountNotExistException.class)
     public ResponseEntity<String> handleAccountNotFoundException(AccountNotExistException e) {
         // Manejar excepción de cuenta no encontrada
@@ -41,7 +37,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountExistException.class)
     public ResponseEntity<String> handleAccountFoundException(AccountExistException e) {
         // Manejar excepción de cuenta existente
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Cuenta existente");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    // De EX-AccountUtils
+    public static Account findAccountByIdOrThrow(AccountRepository accountRepository, Long accountId, String errorMessage) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException(errorMessage + accountId));
     }
 
     // Excepciones para TRANSFERENCIAS
@@ -52,15 +54,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transferencia no encontrada");
     }
 
-
-/*
-    @ExceptionHandler(TransferenceException.class)
-    public ResponseEntity<String> handleTransferenceException(TransferenceException e) {
-        // Manejar excepción de transferencia
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error en la transferencia");
+    @ExceptionHandler(InsufficientFoundsException.class)
+    public ResponseEntity<String> handleInsufficientFoundsException(InsufficientFoundsException e) {
+        // Fondos insuficientes
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Fondos insuficientes");
     }
 
-*/
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -70,12 +73,5 @@ public class GlobalExceptionHandler {
         return "Hay un caracter inválido en la operacion. Verifica los datos ingresados.";
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        // Mensaje personalizado de error para IllegalArgumentException
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
 }
 

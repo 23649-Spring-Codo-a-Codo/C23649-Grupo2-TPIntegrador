@@ -27,6 +27,7 @@ public class UserController {
     // CRUD: Crear, Leer, Modificar, Eliminar
 
 
+    // GET ALL USERS
     @GetMapping
     public ResponseEntity<List<UserDTO>> getUsers(){
         List<UserDTO> lista = service.getUsers();
@@ -34,7 +35,6 @@ public class UserController {
     }
 
     // GET USER BY ID con GlobalExceptionHandler (Alejandra)
-
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){
         return ResponseEntity.ok(service.getUserById(id));
