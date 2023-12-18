@@ -9,8 +9,6 @@ import com.ar.cac.homebanking.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,28 +30,26 @@ public class UserService {
         return usersDtos;
     }
 
-    // Le agregué "throws UserExistsException" (Alejandra)
-    public UserDTO createUser(UserDTO userDto) throws UserExistsException {
-        User userValidated = validateUserByEmail(userDto);
+    public UserDTO createUser(UserDTO userDto) {
+        User userByEmail  = validateUserByEmail(userDto);
+        User userByDni  = validateUserByDni(userDto);
 
-        if (userValidated == null) {
+        if (userByEmail == null && userByDni  == null){
             User userSaved = repository.save(UserMapper.dtoToUser(userDto));
             return UserMapper.userToDto(userSaved);
         } else {
-            throw new UserExistsException("Usuario con mail o con dni exitente: " + userDto.getEmail());
+            throw new UserExistsException("Usuario con mail o con dni existente.");
         }
-
     }
 
-
     public UserDTO getUserById(Long id) {
+        // Si el usuario no existe, lanzar UserNotExistsException
         if (repository.existsById(id)) {
             User entity = repository.findById(id).get();
             return UserMapper.userToDto(entity);
         } else {
             throw new UserNotExistsException("Usuario inexistente");
         }
-
     }
 
     public void deleteUser(Long id) {
@@ -62,16 +58,18 @@ public class UserService {
         } else {
             throw new UserNotExistsException("Usuario inexistente");
         }
-
     }
-
 
     public UserDTO updateUser(Long id, UserDTO dto) {
         if (repository.existsById(id)) {
             User userToModify = repository.findById(id).get();
 
             // Verificar que al menos uno de los campos obligatorios esté presente
-            if (dto.getName() != null || dto.getSurname() != null || dto.getEmail() != null || dto.getPassword() != null || dto.getDni() != null) {
+            if (dto.getName() != null && !dto.getName().isEmpty() ||
+                    dto.getSurname() != null && !dto.getSurname().isEmpty() ||
+                    dto.getEmail() != null && !dto.getEmail().isEmpty() ||
+                    dto.getPassword() != null && !dto.getPassword().isEmpty() ||
+                    dto.getDni() != null && !dto.getDni().isEmpty()) {
                 // Validar qué datos no vienen en null para setearlos al objeto ya creado
 
                 // Logica del Patch
@@ -108,15 +106,13 @@ public class UserService {
         }
     }
 
-
-
     // Validar que existan usuarios unicos por mail
     public User validateUserByEmail(UserDTO dto){
         return repository.findByEmail(dto.getEmail());
     }
 
-
+    // Validar que existan usuarios unicos por dni
+    public User validateUserByDni(UserDTO dto){
+        return repository.findByDni(dto.getDni());
+    }
 }
-
-
-

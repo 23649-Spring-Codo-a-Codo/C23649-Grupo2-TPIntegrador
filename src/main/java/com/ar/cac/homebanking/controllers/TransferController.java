@@ -31,7 +31,7 @@ public class TransferController {
     public ResponseEntity<?> getTransferById(@PathVariable Long id) {
         try {
             TransferDTO transferDTO = service.getTransferById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(service.getTransferById(id));
+            return ResponseEntity.status(HttpStatus.OK).body(transferDTO); //llamo la variable creada en la linea anterior
         } catch (TransferNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transferencia no encontrada: " + e.getMessage());
         }
